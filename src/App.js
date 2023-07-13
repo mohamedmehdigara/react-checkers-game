@@ -95,11 +95,7 @@ function App() {
                 onClick={() => handleCellClick(rowIndex, cellIndex, cell)}
               >
                 {cell && (
-                  <div
-                    className={`piece ${cell.player === 1 ? 'black' : 'red'} ${
-                      cell.king ? 'king' : ''
-                    }`}
-                  ></div>
+                  <Piece player={cell.player} king={cell.king} />
                 )}
               </div>
             ))}
@@ -108,6 +104,13 @@ function App() {
       </div>
     </div>
   );
+}
+
+function Piece({ player, king }) {
+  const pieceClass = player === 1 ? 'black' : 'red';
+  const kingClass = king ? 'king' : '';
+
+  return <div className={`piece ${pieceClass} ${kingClass}`} />;
 }
 
 export default App;
