@@ -4,6 +4,7 @@ import './App.css';
 function App() {
   const [board, setBoard] = useState([]);
   const [selectedPiece, setSelectedPiece] = useState(null);
+  const [currentPlayer, setCurrentPlayer] = useState(1);
 
   // Initialize the game board
   useEffect(() => {
@@ -13,7 +14,7 @@ function App() {
 
   // Create the initial game board
   const createInitialBoard = () => {
-    const initialBoard = Array(8).fill(Array(8).fill(null));
+    const initialBoard = Array(8).fill(null).map(() => Array(8).fill(null));
 
     // Add black pieces
     for (let row = 0; row < 3; row++) {
@@ -38,21 +39,19 @@ function App() {
 
   // Handle cell click
   const handleCellClick = (row, col, piece) => {
-    if (piece && piece.player === 1) {
+    if (piece && piece.player === currentPlayer) {
       setSelectedPiece({ row, col });
     } else if (selectedPiece) {
       movePiece(selectedPiece.row, selectedPiece.col, row, col);
-      setSelectedPiece(null);
     }
   };
 
   // Move the piece to the target position
   const movePiece = (startRow, startCol, targetRow, targetCol) => {
-    const updatedBoard = [...board];
-    const piece = updatedBoard[startRow][startCol];
+    const piece = board[startRow][startCol];
 
     if (isValidMove(piece, startRow, startCol, targetRow, targetCol)) {
-      // Perform the move
+      const updatedBoard = [...board];
       updatedBoard[targetRow][targetCol] = piece;
       updatedBoard[startRow][startCol] = null;
 
@@ -71,11 +70,28 @@ function App() {
       }
 
       setBoard(updatedBoard);
+      setSelectedPiece(null);
+      setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
     }
   };
 
   // Check if the move is valid
   const isValidMove = (piece, startRow, startCol, targetRow, targetCol) => {
+    // Check if the target position is within the board bounds
+    if (
+      targetRow < 0 ||
+      targetRow >= 8 ||
+      targetCol < 0 ||
+      targetCol >= 8
+    ) {
+      return false;
+    }
+
+    // Check if the target position is empty
+    if (board[targetRow][targetCol] !== null) {
+      return false;
+    }
+
     // Game logic for validating the move
     // ...
 
@@ -88,15 +104,13 @@ function App() {
       <div className="board">
         {board.map((row, rowIndex) => (
           <div key={rowIndex} className="row">
-            {row.map((cell, cellIndex) => (
+            {row.map((cell, colIndex) => (
               <div
-                key={cellIndex}
-                className={`cell ${cell ? (cell.king ? 'king' : 'occupied') : ''}`}
-                onClick={() => handleCellClick(rowIndex, cellIndex, cell)}
+                key={colIndex}
+                className={`cell ${cell && (cell.king ? 'king' : 'occupied')}`}
+                onClick={() => handleCellClick(rowIndex, colIndex, cell)}
               >
-                {cell && (
-                  <Piece player={cell.player} king={cell.king} />
-                )}
+                {cell && <Piece player={cell.player} king={cell.king} />}
               </div>
             ))}
           </div>
